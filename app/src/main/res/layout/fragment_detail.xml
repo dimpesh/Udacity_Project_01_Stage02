@@ -40,6 +40,15 @@
             android:textSize="28sp"
             android:layout_gravity="left|center_vertical"
             android:adjustViewBounds="true"/>
+
+        <!--  Added button to check Database conntecitivty -->
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="addFavourite"
+            android:id="@+id/favouriteBtn"
+            android:text="Add To Favourites"
+            />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -60,10 +69,9 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="215dp"
             android:id="@+id/favbtn"
-            android:layout_marginTop="135dp"
+            android:layout_marginTop="150dp"
             android:background="#e01879"
             android:src="@android:drawable/star_off" />
-
     </FrameLayout>
 
             <TextView

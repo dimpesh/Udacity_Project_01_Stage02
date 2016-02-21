@@ -15,6 +15,13 @@ public class MovieContract
 
     public static final Uri BASE_CONTENT_URI=Uri.parse("content://"+CONTENT_AUTHORITY);
 
+    //Path For Movies, Reviews and Trailers...
+    public static final String PATH_MOVIE="movie";
+//    public static final String PATH_TRAILER="trailer";
+//    public static final String PATH_REVIEW="review";
+
+
+
     public static final class MovieEntry implements BaseColumns
     {
         //Table
@@ -41,10 +48,68 @@ public class MovieContract
         public static final String CONTENT_ITEM_TYPE=ContentResolver.CURSOR_ITEM_BASE_TYPE+"/"+CONTENT_AUTHORITY+"/"+TABLE_MOVIE;
 
         // FOR BUILDING URI ON INSERTION
+
+        // May change as per need
         public static Uri buildMoviesUri(long id)
         {
+
             return ContentUris.withAppendedId(CONTENT_URI,id);
         }
     }
+
+//    public static final class ReviewEntry implements BaseColumns
+//    {
+//
+//        //Table
+//        public static final String TABLE_REVIEW="movie_review";
+//
+//        // Columns name
+//        public static final String COLUMN_ID="_id";
+//        public static final String COLUMN_MOVIEID= "movie_id";
+//        public static final String COLUMN_CONTENT= "content";
+//
+//        public static final Uri CONTENT_URI=BASE_CONTENT_URI.buildUpon().appendPath(PATH_REVIEW).build();
+//
+//        //Create cursor of base dir type for multiple entries
+//        public static final String CONTENT_DIR_TYPE= ContentResolver.CURSOR_DIR_BASE_TYPE+"/"+CONTENT_AUTHORITY+"/"+TABLE_REVIEW;
+//
+//        // CURSOR FOR SINGLE ENTRY
+//        public static final String CONTENT_ITEM_TYPE=ContentResolver.CURSOR_ITEM_BASE_TYPE+"/"+CONTENT_AUTHORITY+"/"+TABLE_REVIEW;
+//
+//        // FOR BUILDING URI ON INSERTION
+//        public static Uri buildReviewsUri(long id)
+//        {
+//            return ContentUris.withAppendedId(CONTENT_URI,id);
+//        }
+//    }
+
+//    public static final class TrailerEntry implements BaseColumns
+//    {
+//
+//        //Table
+//        public static final String TABLE_TRAILER="movie_trailer";
+//
+//        // Columns name
+//        public static final String COLUMN_ID="_id";
+//        public static final String COLUMN_MOVIEID= "movie_id";
+//        public static final String COLUMN_KEY="key";
+//
+//
+//        public static final Uri CONTENT_URI=BASE_CONTENT_URI.buildUpon().appendPath(PATH_TRAILER).build();
+//
+//        //Create cursor of base dir type for multiple entries
+//        public static final String CONTENT_DIR_TYPE= ContentResolver.CURSOR_DIR_BASE_TYPE+"/"+CONTENT_AUTHORITY+"/"+TABLE_TRAILER;
+//
+//        // CURSOR FOR SINGLE ENTRY
+//        public static final String CONTENT_ITEM_TYPE=ContentResolver.CURSOR_ITEM_BASE_TYPE+"/"+CONTENT_AUTHORITY+"/"+TABLE_TRAILER;
+//
+//        // FOR BUILDING URI ON INSERTION
+//        public static Uri buildTrailer7sUri(long id)
+//        {
+//            return ContentUris.withAppendedId(CONTENT_URI,id);
+//        }
+//    }
+
+
 
 }

@@ -1,5 +1,6 @@
 package com.movies.app.popularmovies;
 
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
@@ -12,9 +13,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -40,6 +43,7 @@ public class DetailActivityFragment extends Fragment {
     String baseUrlImage="http://image.tmdb.org/t/p/w185/";
     TrailerAdapter myTrailerAdapter;
     TrailerObject[] trailerObjects;
+    Button fBtn;
     List<String> trailerKeyList;
     String LOG_TAG= DetailActivityFragment.class.getSimpleName();
     String MyAppString = "#SpotifyStreamer";
@@ -60,26 +64,43 @@ public class DetailActivityFragment extends Fragment {
 //l4        Bundle bundle= intent.getExtras();
         String API_KEY="api_key";
    //     trailerAdapter=new TrailerAdapter(getActivity(),R.layout.list_item_trailer,R.id.trailer_image,trailerKeyList);
-        FloatingActionButton updateFavouriteButton= (FloatingActionButton) rootView.findViewById(R.id.favbtn);
+        FloatingActionButton updateFavouriteButton = (FloatingActionButton) rootView.findViewById(R.id.favbtn);
+
         // Trailer Object Populate the Trailer ListView
         trailerObjects= new TrailerObject[]{new TrailerObject(), new TrailerObject()};
 
         List<TrailerObject> listmovie=new ArrayList<TrailerObject>(Arrays.asList(trailerObjects));
         myTrailerAdapter=new TrailerAdapter(getActivity(),R.layout.trailer_item_imageview,R.id.gridview_movies_imageview,listmovie);
+// Added Temporary Button
 
+        fBtn= (Button) rootView.findViewById(R.id.favouriteBtn);
 
 //l4        MovieObject movieRecieved= (MovieObject) bundle.getSerializable("MovieObjectSent");
-            MovieObject movieRecieved=intent.getParcelableExtra("data");
+            final MovieObject movieRecieved=intent.getParcelableExtra("data");
         ImageView movieBackdrop= (ImageView) rootView.findViewById(R.id.movie_backdrop);
-        ImageView moviePoster= (ImageView) rootView.findViewById(R.id.movie_poster);
+        final ImageView moviePoster= (ImageView) rootView.findViewById(R.id.movie_poster);
         TextView movie_vote_average= (TextView) rootView.findViewById(R.id.movie_vote_average);
-        TextView movie_release= (TextView) rootView.findViewById(R.id.movie_release);
+        final TextView movie_release= (TextView) rootView.findViewById(R.id.movie_release);
         Picasso.with(getContext()).load(baseUrlImage+movieRecieved.backdrop_path).into(movieBackdrop);
         Picasso.with(getContext()).load(baseUrlImage+movieRecieved.poster_path).into(moviePoster);
         getActivity().setTitle(movieRecieved.title);
         new DataFetcher().execute(movieRecieved.id);
+
        // new TrailerFetcher().execute(movieRecieved.id);
    //     new TrailerFetcher().execute(movieRecieved.id);
+
+
+// Added fab on CLick Listener
+
+        updateFavouriteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(getContext(), "FAB Clicked...", Toast.LENGTH_SHORT).show();
+
+            }
+        });
+
+        //Uptil Here
 
         GridView trailerview= (GridView) rootView.findViewById(R.id.gridview_trailersview);
         trailerview.setAdapter(myTrailerAdapter);
@@ -104,10 +125,60 @@ public class DetailActivityFragment extends Fragment {
       //  reviewView.setText(reviewStr);
 
 
+        fBtn.setOnClickListener(new View.OnClickListener() {
+            boolean didItWork=true;
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(view.getContext(),"Added",Toast.LENGTH_SHORT).show();
+                try {
+
+                    String entTitle=movieRecieved.title;
+                String entOverview=movieRecieved.overview;
+                String entRelease=movieRecieved.release_date;
+                MyMovieClass entry=new MyMovieClass(view.getContext());
+                    entry.open();
+                    // Entry for Movie
+                    entry.createEntry(entTitle, entOverview, entRelease);
+                    // Entry for Review
+//                    entry.createReviewEntry(movieRecieved.id, reviewView.getText().toString());
+//                    entry.createTrailerEntry(movieRecieved.id);
+                    // Entry for Trailer
+                    entry.close();
+
+                }
+                catch (Exception e) {
+                    didItWork=false;
+                    e.printStackTrace();
+                }
+                finally {
+                    if(didItWork)
+                    {
+                        Dialog dialog=new Dialog(getContext());
+                        dialog.setTitle("Success...");
+                        TextView tv=new TextView(getContext());
+                        tv.setText("Movie is Added !");
+                        dialog.setContentView(tv);
+                        dialog.show();
+
+
+                    }
+                }
+
+
+            }
+        });
         return rootView;
 
 
     }
+
+
+
+//    public void fabClicked(View v)
+//    {
+//        Toast.makeText(this.getContext(),"Button Clicked",Toast.LENGTH_SHORT).show();
+//    }
+
 
     public class DataFetcher extends AsyncTask<String,Void,String>
     {
