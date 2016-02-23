@@ -28,11 +28,10 @@ public class TrailerAdapter extends ArrayAdapter<TrailerObject> {
         String baseUrl = "http://img.youtube.com/vi/";
         String endUrl = "/1.jpg";
         String key=trailerObject.getKey();
+
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.trailer_item_imageview, parent, false);
         }
-
-
         ImageView trailerView = (ImageView) convertView.findViewById(R.id.gridview_movies_imageview);
 
 //        Log.v(LOG_TAG,baseUrl+trailerObject.key+endUrl);
@@ -40,4 +39,5 @@ public class TrailerAdapter extends ArrayAdapter<TrailerObject> {
        Picasso.with(getContext()).load(baseUrl+key+endUrl).into(trailerView);
         return convertView;
     }
+
 }

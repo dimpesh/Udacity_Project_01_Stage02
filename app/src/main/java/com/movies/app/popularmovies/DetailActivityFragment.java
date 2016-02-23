@@ -8,8 +8,13 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.ShareActionProvider;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -35,14 +40,22 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * A placeholder fragment containing a simple view.
  */
-public class DetailActivityFragment extends Fragment {
+public class DetailActivityFragment extends Fragment
+{
+    public String share_key;
+    ShareActionProvider mShareActionProvider;
     String baseUrlImage="http://image.tmdb.org/t/p/w185/";
     TrailerAdapter myTrailerAdapter;
     TrailerObject[] trailerObjects;
+    TrailerObject[] keyObject;
+    String baseUrl="http://www.youtube.com/watch?v=";
+    String hashApp="#MyMovieTrailer";
+    public static String static_key;
     Button fBtn;
     List<String> trailerKeyList;
     String LOG_TAG= DetailActivityFragment.class.getSimpleName();
@@ -51,14 +64,26 @@ public class DetailActivityFragment extends Fragment {
     String trailer_string;
     int cnt=0;
     TextView reviewView;
-    public DetailActivityFragment() {
+    public DetailActivityFragment()
+    {
+        setHasOptionsMenu(true);
     }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
+    {
+        inflater.inflate(R.menu.fragment_detail, menu);
+        MenuItem item=menu.findItem(R.id.item_action_share);
+        mShareActionProvider=(ShareActionProvider) MenuItemCompat.getActionProvider(item);
+        mShareActionProvider.setShareIntent(getDefaultShareIntent());
+
+    }
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         View rootView=inflater.inflate(R.layout.fragment_detail, container, false);
         Intent intent=getActivity().getIntent();
 //l4        Bundle bundle= intent.getExtras();
@@ -81,11 +106,22 @@ public class DetailActivityFragment extends Fragment {
         final ImageView moviePoster= (ImageView) rootView.findViewById(R.id.movie_poster);
         TextView movie_vote_average= (TextView) rootView.findViewById(R.id.movie_vote_average);
         final TextView movie_release= (TextView) rootView.findViewById(R.id.movie_release);
-        Picasso.with(getContext()).load(baseUrlImage+movieRecieved.backdrop_path).into(movieBackdrop);
-        Picasso.with(getContext()).load(baseUrlImage+movieRecieved.poster_path).into(moviePoster);
+        Picasso.with(getContext()).load(baseUrlImage + movieRecieved.backdrop_path).into(movieBackdrop);
+        Picasso.with(getContext()).load(baseUrlImage + movieRecieved.poster_path).into(moviePoster);
         getActivity().setTitle(movieRecieved.title);
-        new DataFetcher().execute(movieRecieved.id);
 
+        new DataFetcher().execute(movieRecieved.id);
+        try {
+            keyObject=new TrailerFetcher().execute(movieRecieved.id).get();
+            trailer_string=keyObject[0].getKey();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
+
+//        Log.v("MAIN STATIC KEY",static_key);
        // new TrailerFetcher().execute(movieRecieved.id);
    //     new TrailerFetcher().execute(movieRecieved.id);
 
@@ -105,12 +141,14 @@ public class DetailActivityFragment extends Fragment {
         GridView trailerview= (GridView) rootView.findViewById(R.id.gridview_trailersview);
         trailerview.setAdapter(myTrailerAdapter);
 
+//        keyObject=myTrailerAdapter.getItem(0);
+//        share_key=keyObject.key;
 
         trailerview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                TrailerObject trailerObject=myTrailerAdapter.getItem(position);
-                String key=trailerObject.getKey();
+                TrailerObject trailerObject = myTrailerAdapter.getItem(position);
+                String key = trailerObject.getKey();
                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.youtube.com/watch?v=" + key)));
             }
         });
@@ -118,11 +156,12 @@ public class DetailActivityFragment extends Fragment {
         TextView overview= (TextView) rootView.findViewById(R.id.movie_overview);
 
         overview.setText(movieRecieved.overview);
-
+//        TrailerObject obj=myTrailerAdapter.getItem(1);
+//        Log.v(LOG_TAG,obj.getKey());
         movie_release.setText(movieRecieved.release_date);
         movie_vote_average.setText(movieRecieved.vote_average);
         reviewView= (TextView) rootView.findViewById(R.id.movie_review);
-      //  reviewView.setText(reviewStr);
+        reviewView.setText(reviewStr);
 
 
         fBtn.setOnClickListener(new View.OnClickListener() {
@@ -167,10 +206,18 @@ public class DetailActivityFragment extends Fragment {
 
             }
         });
+
         return rootView;
 
 
     }
+
+//    private String findMovieKey(TrailerAdapter myTrailerAdapter) {
+//
+//        String key= String.valueOf(myTrailerAdapter.getCount());
+//
+//        return key;
+//    }
 
 
 
@@ -196,6 +243,8 @@ public class DetailActivityFragment extends Fragment {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+             dialog.setMessage("Loading...");
+            dialog.show();
             dialog.setMessage("Loading...");
             dialog.show();
         }
@@ -205,7 +254,7 @@ public class DetailActivityFragment extends Fragment {
         {
 
             reviewView.setText(str);
-            new TrailerFetcher().execute(movie_id);
+//            new TrailerFetcher().execute(movie_id);
 
             if(dialog.isShowing())
                 dialog.dismiss();
@@ -286,10 +335,14 @@ public class DetailActivityFragment extends Fragment {
         @Override
         protected void onPostExecute(TrailerObject[] str) {
 
+
+            Log.v("KEY VERBOSE", str[0].key);
             if (str != null)
                 myTrailerAdapter.clear();
-
             myTrailerAdapter.addAll(str);
+            static_key=generateKey(str[0]);
+            Log.v("STATIC KEY : ",static_key);
+
             myTrailerAdapter.notifyDataSetChanged();
 
             if(dialog.isShowing()==true)
@@ -340,10 +393,9 @@ public class DetailActivityFragment extends Fragment {
                     //JSONObject authorObject=review.getJSONObject("author");
                     trailerObjects[i].id = jsonArrayJSONObject.getString("id");
                     Log.v("ID VERBOSE",jsonArrayJSONObject.getString("key"));
+                    //String key=jsonArrayJSONObject.getString("key");
                     trailerObjects[i].key = jsonArrayJSONObject.getString("key");
                     trailerObjects[i].name = jsonArrayJSONObject.getString("name");
-
-
                 }
 
             } catch (MalformedURLException e) {
@@ -358,7 +410,22 @@ public class DetailActivityFragment extends Fragment {
         }
     }
 
+     Intent getDefaultShareIntent()
+    {
+        Intent intent=new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
 
+    //    TrailerObject obj=myTrailerAdapter.getItem(0);
 
+    //    intent.putExtra(Intent.EXTRA_TEXT,baseUrl+share_key+"\n"+hashApp);
+          intent.putExtra(Intent.EXTRA_TEXT,baseUrl+trailer_string+"\n"+hashApp);
+        return intent;
+    }
+
+    static String generateKey(TrailerObject j)
+    {
+        return j.getKey();
+    }
 }
 
