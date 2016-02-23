@@ -1,6 +1,5 @@
 package com.movies.app.popularmovies.Data;
 
-import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.net.Uri;
 import android.provider.BaseColumns;
@@ -25,7 +24,10 @@ public class MovieContract
     public static final class MovieEntry implements BaseColumns
     {
         //Table
-        public static final String TABLE_MOVIE="movie_detail";
+        //    trying something  public static final String TABLE_MOVIE="movie_detail";
+        public static final String TABLE_MOVIE="movie";
+
+
 
         // Columns name
         public static final String COLUMN_ID="_id";
@@ -38,22 +40,32 @@ public class MovieContract
         public static final String COLUMN_MOVIE_ID="movie_id";
 
 
-        // Create Content Uri
+///*        CHECKING SOMETHING SO UNCOMMENT IF NOT RUNNING...
+//        // Create Content Uri
+//        public static final Uri CONTENT_URI=BASE_CONTENT_URI.buildUpon().appendPath(TABLE_MOVIE).build();
+//
+//        //Create cursor of base dir type for multiple entries
+//        public static final String CONTENT_DIR_TYPE= ContentResolver.CURSOR_DIR_BASE_TYPE+"/"+CONTENT_AUTHORITY+"/"+TABLE_MOVIE;
+//
+//        // CURSOR FOR SINGLE ENTRY
+//        public static final String CONTENT_ITEM_TYPE=ContentResolver.CURSOR_ITEM_BASE_TYPE+"/"+CONTENT_AUTHORITY+"/"+TABLE_MOVIE;
+//
+//        // FOR BUILDING URI ON INSERTION
+//
+//*/
         public static final Uri CONTENT_URI=BASE_CONTENT_URI.buildUpon().appendPath(TABLE_MOVIE).build();
+        public static final String CONTENT_DIR_TYPE="vnd.android.cursor.dir/"+CONTENT_AUTHORITY+"/"+PATH_MOVIE;
+        public static final String CONTENT_ITEM_TYPE="vnd.android.cursor.item/"+CONTENT_AUTHORITY+"/"+PATH_MOVIE;
 
-        //Create cursor of base dir type for multiple entries
-        public static final String CONTENT_DIR_TYPE= ContentResolver.CURSOR_DIR_BASE_TYPE+"/"+CONTENT_AUTHORITY+"/"+TABLE_MOVIE;
 
-        // CURSOR FOR SINGLE ENTRY
-        public static final String CONTENT_ITEM_TYPE=ContentResolver.CURSOR_ITEM_BASE_TYPE+"/"+CONTENT_AUTHORITY+"/"+TABLE_MOVIE;
 
-        // FOR BUILDING URI ON INSERTION
 
         // May change as per need
         public static Uri buildMoviesUri(long id)
         {
 
-            return ContentUris.withAppendedId(CONTENT_URI,id);
+//            return CONTENT_URI.buildUpon().appendPath(id).build();
+            return ContentUris.withAppendedId(CONTENT_URI, id);
         }
     }
 

@@ -11,8 +11,8 @@ public class MovieDbHelper extends SQLiteOpenHelper{
     public static final String LOG_TAG=MovieDbHelper.class.getSimpleName();
 
     // Database name and version
-    private static final String DATABASE_NAME="movies.db";
-    private static final int DATABASE_VERSION=1;
+    public static final String DATABASE_NAME="movies.db";
+    public static final int DATABASE_VERSION=1;
 
 
 
@@ -28,9 +28,11 @@ public class MovieDbHelper extends SQLiteOpenHelper{
                 +MovieContract.MovieEntry._ID+" INTEGER PRIMARY KEY AUTOINCREMENT,"
                 +MovieContract.MovieEntry.COLUMN_TITLE+" TEXT NOT NULL,"
                 +MovieContract.MovieEntry.COLUMN_OVERVIEW+" TEXT NOT NULL,"
-                +MovieContract.MovieEntry.COLUMN_RELEASE_DATE+"TEXT NOT NULL,"
+                +MovieContract.MovieEntry.COLUMN_RELEASE_DATE+" TEXT NOT NULL,"
                 +MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE+" TEXT NOT NULL,"
-                +"UNIQUE( "+MovieContract.MovieEntry.COLUMN_MOVIE_ID +") ON CONFLICT REPLACE);";
+                +MovieContract.MovieEntry.COLUMN_POSTER_PATH+" TEXT NOT NULL,"
+                +MovieContract.MovieEntry.COLUMN_BACKDROP_PATH+" TEXT NOT NULL, "
+                +MovieContract.MovieEntry.COLUMN_MOVIE_ID +" INTEGER UNIQUE );";
 
         // try declaring text
  //              +MovieContract.MovieEntry.COLUMN_POSTER_PATH+" BLOB NOT NULL,"
