@@ -34,7 +34,7 @@ public class MovieAdapter extends ArrayAdapter {
         if(convertView==null)
             convertView= LayoutInflater.from(getContext()).inflate(R.layout.grid_item_movies, parent, false);
             ImageView imageView = (ImageView) convertView.findViewById(R.id.grid_item_movies_imageview);
-            Picasso.with(getContext()).load(baseImageUrl + poster_path).into(imageView);
+            Picasso.with(getContext()).load(baseImageUrl + poster_path).placeholder(R.mipmap.img_placeholder).into(imageView);
             return convertView;
     }
 }

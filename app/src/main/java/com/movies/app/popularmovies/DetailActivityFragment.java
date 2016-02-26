@@ -1,8 +1,9 @@
 package com.movies.app.popularmovies;
 
-import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -24,6 +25,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.movies.app.popularmovies.Data.MovieContract;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
@@ -47,6 +49,7 @@ import java.util.concurrent.ExecutionException;
  */
 public class DetailActivityFragment extends Fragment
 {
+    boolean isFavourite=false;
     public String share_key;
     ShareActionProvider mShareActionProvider;
     String baseUrlImage="http://image.tmdb.org/t/p/w185/";
@@ -62,11 +65,37 @@ public class DetailActivityFragment extends Fragment
     String MyAppString = "#SpotifyStreamer";
     String reviewStr;
     String trailer_string;
+    public MovieObject movieRecieved;
     int cnt=0;
     TextView reviewView;
     public DetailActivityFragment()
     {
         setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        Intent intent=getActivity().getIntent();
+        movieRecieved=intent.getParcelableExtra("data");
+
+        // Uncomment to share key value correctly...
+//        try {
+//
+//           trailer_string=new TrailerFetcher().execute(movieRecieved.id).get()[0].getKey();
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        } catch (ExecutionException e) {
+//            e.printStackTrace();
+//        }
+//
+        new DataFetcher().execute(movieRecieved.id);
+
+        // Uptil Here..
+
+
+
     }
 
     @Override
@@ -89,7 +118,7 @@ public class DetailActivityFragment extends Fragment
 //l4        Bundle bundle= intent.getExtras();
         String API_KEY="api_key";
    //     trailerAdapter=new TrailerAdapter(getActivity(),R.layout.list_item_trailer,R.id.trailer_image,trailerKeyList);
-        FloatingActionButton updateFavouriteButton = (FloatingActionButton) rootView.findViewById(R.id.favbtn);
+        final FloatingActionButton updateFavouriteButton = (FloatingActionButton) rootView.findViewById(R.id.favbtn);
 
         // Trailer Object Populate the Trailer ListView
         trailerObjects= new TrailerObject[]{new TrailerObject(), new TrailerObject()};
@@ -98,7 +127,7 @@ public class DetailActivityFragment extends Fragment
         myTrailerAdapter=new TrailerAdapter(getActivity(),R.layout.trailer_item_imageview,R.id.gridview_movies_imageview,listmovie);
 // Added Temporary Button
 
-        fBtn= (Button) rootView.findViewById(R.id.favouriteBtn);
+//        fBtn= (Button) rootView.findViewById(R.id.favouriteBtn);
 
 //l4        MovieObject movieRecieved= (MovieObject) bundle.getSerializable("MovieObjectSent");
             final MovieObject movieRecieved=intent.getParcelableExtra("data");
@@ -106,20 +135,48 @@ public class DetailActivityFragment extends Fragment
         final ImageView moviePoster= (ImageView) rootView.findViewById(R.id.movie_poster);
         TextView movie_vote_average= (TextView) rootView.findViewById(R.id.movie_vote_average);
         final TextView movie_release= (TextView) rootView.findViewById(R.id.movie_release);
-        Picasso.with(getContext()).load(baseUrlImage + movieRecieved.backdrop_path).into(movieBackdrop);
-        Picasso.with(getContext()).load(baseUrlImage + movieRecieved.poster_path).into(moviePoster);
+        Picasso.with(getContext()).load(baseUrlImage + movieRecieved.backdrop_path).placeholder(R.mipmap.img_placeholder).into(movieBackdrop);
+        Picasso.with(getContext()).load(baseUrlImage + movieRecieved.poster_path).placeholder(R.mipmap.img_placeholder).into(moviePoster);
         getActivity().setTitle(movieRecieved.title);
 
-        new DataFetcher().execute(movieRecieved.id);
+
+        // Uncomment to share key value correctly...
         try {
-            keyObject=new TrailerFetcher().execute(movieRecieved.id).get();
-            trailer_string=keyObject[0].getKey();
+
+           trailer_string=new TrailerFetcher().execute(movieRecieved.id).get()[0].getKey();
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
             e.printStackTrace();
         }
 
+        String url="content://com.movies.app.popularmovies.app/movie";
+
+        Uri fetchUri=Uri.parse(url);
+        Cursor findQuery=getContext().getContentResolver().query(fetchUri, null, "movie_id=" + movieRecieved.id, null, null);
+        if(findQuery.moveToFirst()) {
+            isFavourite=true;
+        }
+        if(isFavourite==true)
+        {
+            updateFavouriteButton.setImageResource(R.mipmap.like);
+
+        }
+        else
+        {
+            updateFavouriteButton.setImageResource(R.mipmap.dislike);
+
+        }
+
+
+
+//        catch (TimeoutException e) {
+//            e.printStackTrace();
+//        }
+
+//        new DataFetcher().execute(movieRecieved.id);
+
+        // Uptil Here..
 
 //        Log.v("MAIN STATIC KEY",static_key);
        // new TrailerFetcher().execute(movieRecieved.id);
@@ -131,7 +188,60 @@ public class DetailActivityFragment extends Fragment
         updateFavouriteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(getContext(), "FAB Clicked...", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getContext(), "FAB Clicked...", Toast.LENGTH_SHORT).show();
+// Tries Code from Here...
+                String url="content://com.movies.app.popularmovies.app/movie";
+
+                Uri fetchUri=Uri.parse(url);
+
+//                Cursor findQuery=getContext().getContentResolver().query(fetchUri, null, "movie_id=" + movieRecieved.id, null, null);
+//                if(findQuery.moveToFirst()) {
+//                    isFavourite=true;
+//                    Log.v("MOVIE AVAILABLE VERBOES", "MOVIE IS ADDED ALREADY "+isFavourite);
+//
+//                }
+                if(isFavourite==false) {
+
+                    ContentValues values = new ContentValues();
+                    values.put(MovieContract.MovieEntry.COLUMN_TITLE, movieRecieved.title);
+                    values.put(MovieContract.MovieEntry.COLUMN_OVERVIEW, movieRecieved.overview);
+                    values.put(MovieContract.MovieEntry.COLUMN_RELEASE_DATE, movieRecieved.release_date);
+                    values.put(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE, movieRecieved.vote_average);
+                    values.put(MovieContract.MovieEntry.COLUMN_POSTER_PATH, movieRecieved.poster_path);
+                    values.put(MovieContract.MovieEntry.COLUMN_BACKDROP_PATH, movieRecieved.backdrop_path);
+                    values.put(MovieContract.MovieEntry.COLUMN_MOVIE_ID, movieRecieved.id);
+                    Uri uri = getContext().getContentResolver().insert(MovieContract.MovieEntry.CONTENT_URI, values);
+
+                    Toast.makeText(getContext(), "Added TO Favourites...", Toast.LENGTH_SHORT).show();
+                    updateFavouriteButton.setImageResource(R.mipmap.like);
+                    isFavourite=true;
+                    String result = "";
+                    Cursor c = getContext().getContentResolver().query(fetchUri, null, null, null, null);
+                    if (c.moveToFirst()) {
+                        do {
+                            {
+                                result = "S. NUMBER           : " + c.getString(c.getColumnIndex(MovieContract.MovieEntry._ID))
+                                        + "\nMOVIE ID             : " + c.getString(c.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_ID))
+                                        + "\nMOVIE TITLE          : " + c.getString(c.getColumnIndex(MovieContract.MovieEntry.COLUMN_TITLE));
+//                                    +"\nMOVIE OVERVIEW       : "+c.getString(c.getColumnIndex(MovieContract.MovieEntry.COLUMN_OVERVIEW))
+//                                    +"\nMOVIE RELEASE DATE   : "+c.getString(c.getColumnIndex(MovieContract.MovieEntry.COLUMN_RELEASE_DATE))
+//                                    +"\nMOVIE VOTE           : "+c.getString(c.getColumnIndex(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE))
+//                                    +"\nMOVIE POSTER         : "+c.getString(c.getColumnIndex(MovieContract.MovieEntry.COLUMN_POSTER_PATH))
+                                //                        +"\nMOVIE BACKDROP       : "+c.getString(c.getColumnIndex(MovieContract.MovieEntry.COLUMN_BACKDROP_PATH)).toString();
+
+                                Log.v("RESULT_QUERY VERBOSE", result);
+                            }
+                        } while (c.moveToNext());
+                    }
+// Uptil Here...
+                }
+                else
+                {
+                    Toast.makeText(getContext(),"Movie Successfully Removed...",Toast.LENGTH_SHORT).show();
+                    int delID=getContext().getContentResolver().delete(fetchUri,"movie_id="+movieRecieved.id,null);
+                    updateFavouriteButton.setImageResource(R.mipmap.dislike);
+                    isFavourite=false;
+                }
 
             }
         });
@@ -164,48 +274,48 @@ public class DetailActivityFragment extends Fragment
         reviewView.setText(reviewStr);
 
 
-        fBtn.setOnClickListener(new View.OnClickListener() {
-            boolean didItWork=true;
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(view.getContext(),"Added",Toast.LENGTH_SHORT).show();
-                try {
-
-                    String entTitle=movieRecieved.title;
-                String entOverview=movieRecieved.overview;
-                String entRelease=movieRecieved.release_date;
-                MyMovieClass entry=new MyMovieClass(view.getContext());
-                    entry.open();
-                    // Entry for Movie
-                    entry.createEntry(entTitle, entOverview, entRelease);
-                    // Entry for Review
-//                    entry.createReviewEntry(movieRecieved.id, reviewView.getText().toString());
-//                    entry.createTrailerEntry(movieRecieved.id);
-                    // Entry for Trailer
-                    entry.close();
-
-                }
-                catch (Exception e) {
-                    didItWork=false;
-                    e.printStackTrace();
-                }
-                finally {
-                    if(didItWork)
-                    {
-                        Dialog dialog=new Dialog(getContext());
-                        dialog.setTitle("Success...");
-                        TextView tv=new TextView(getContext());
-                        tv.setText("Movie is Added !");
-                        dialog.setContentView(tv);
-                        dialog.show();
-
-
-                    }
-                }
-
-
-            }
-        });
+//        fBtn.setOnClickListener(new View.OnClickListener() {
+//            boolean didItWork=true;
+//            @Override
+//            public void onClick(View view) {
+//                Toast.makeText(view.getContext(),"Added",Toast.LENGTH_SHORT).show();
+//                try {
+//
+//                    String entTitle=movieRecieved.title;
+//                String entOverview=movieRecieved.overview;
+//                String entRelease=movieRecieved.release_date;
+//                MyMovieClass entry=new MyMovieClass(view.getContext());
+//                    entry.open();
+//                    // Entry for Movie
+//                    entry.createEntry(entTitle, entOverview, entRelease);
+//                    // Entry for Review
+////                    entry.createReviewEntry(movieRecieved.id, reviewView.getText().toString());
+////                    entry.createTrailerEntry(movieRecieved.id);
+//                    // Entry for Trailer
+//                    entry.close();
+//
+//                }
+//                catch (Exception e) {
+//                    didItWork=false;
+//                    e.printStackTrace();
+//                }
+//                finally {
+//                    if(didItWork)
+//                    {
+//                        Dialog dialog=new Dialog(getContext());
+//                        dialog.setTitle("Success...");
+//                        TextView tv=new TextView(getContext());
+//                        tv.setText("Movie is Added !");
+//                        dialog.setContentView(tv);
+//                        dialog.show();
+//
+//
+//                    }
+//                }
+//
+//
+//            }
+//        });
 
         return rootView;
 
@@ -235,6 +345,7 @@ public class DetailActivityFragment extends Fragment
         String jsonStr;
         int cnt=1;
         String reviewStr="";
+        String reviewBaseUrl="https://api.themoviedb.org/3/movie/";
         String movie_id;
         BufferedReader reader=null;
         // String baseUrl="https://api.themoviedb.org/3/movie/286217/";
@@ -262,10 +373,12 @@ public class DetailActivityFragment extends Fragment
 
         @Override
         protected String doInBackground(String...strings) {
-            //Uri buildUrl=Uri.parse(baseUrl+strings[0]).buildUpon().appendQueryParameter(API_KEY, getString(R.string.api_key)).build();
+            Uri buildUrl=Uri.parse(reviewBaseUrl+strings[0]+"/reviews").buildUpon().appendQueryParameter(API_KEY, getString(R.string.api_key)).build();
+//            Log.v("DATAFETCHER URI",buildUrl.toString());
             try {
                 movie_id=strings[0];
-                URL url=new URL("https://api.themoviedb.org/3/movie/"+strings[0]+"/reviews?api_key=69323240f26aaa3f0ed513e2fd344a5f");
+//                URL url=new URL("https://api.themoviedb.org/3/movie/"+strings[0]+"/reviews?api_key=69323240f26aaa3f0ed513e2fd344a5f");
+                    URL url=new URL(buildUrl.toString());
                 Log.v(LOG_TAG+"VERBOSE",url.toString());
                 urlConnection=(HttpURLConnection)url.openConnection();
                 urlConnection.setRequestMethod("GET");
@@ -326,6 +439,7 @@ public class DetailActivityFragment extends Fragment
         String LOG_TAG = TrailerFetcher.class.getSimpleName();
         String API_KEY = "api_key";
         String jsonStr;
+        public String trailerBaseUrl="https://api.themoviedb.org/3/movie/";
         String myTrailer = "";
         //        String []trailer_key=null;
         BufferedReader reader = null;
@@ -334,21 +448,21 @@ public class DetailActivityFragment extends Fragment
 
         @Override
         protected void onPostExecute(TrailerObject[] str) {
-
-
-            Log.v("KEY VERBOSE", str[0].key);
-            if (str != null)
-                myTrailerAdapter.clear();
-            myTrailerAdapter.addAll(str);
-            static_key=generateKey(str[0]);
-            Log.v("STATIC KEY : ",static_key);
-
-            myTrailerAdapter.notifyDataSetChanged();
-
             if(dialog.isShowing()==true)
             {
                 dialog.dismiss();
             }
+
+
+//            Log.v("KEY VERBOSE", str[0].key);
+            if (str != null)
+                myTrailerAdapter.clear();
+            myTrailerAdapter.addAll(str);
+//            static_key=generateKey(str[0]);
+//            Log.v("STATIC KEY : ",static_key);
+
+            myTrailerAdapter.notifyDataSetChanged();
+
         }
 
         @Override
@@ -361,7 +475,9 @@ public class DetailActivityFragment extends Fragment
         @Override
         protected TrailerObject[] doInBackground(String... strings) {
             try {
-                URL url = new URL("https://api.themoviedb.org/3/movie/"+strings[0]+"/videos?api_key=69323240f26aaa3f0ed513e2fd344a5f");
+                Uri buildUrl=Uri.parse(trailerBaseUrl+strings[0]+"/videos").buildUpon().appendQueryParameter(API_KEY, getString(R.string.api_key)).build();
+ //               URL url = new URL("https://api.themoviedb.org/3/movie/"+strings[0]+"/videos?api_key=69323240f26aaa3f0ed513e2fd344a5f");
+                URL url=new URL(buildUrl.toString());
                 Log.v(LOG_TAG + "VERBOSE", url.toString());
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");

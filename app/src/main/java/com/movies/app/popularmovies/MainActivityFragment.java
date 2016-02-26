@@ -1,7 +1,11 @@
 package com.movies.app.popularmovies;
 
+import android.app.LoaderManager;
 import android.app.ProgressDialog;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -16,6 +20,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
+
+import com.movies.app.popularmovies.Data.MovieContract;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -37,7 +43,10 @@ import java.util.List;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class MainActivityFragment extends Fragment {
+public class MainActivityFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>{
+
+    // CursorLoader Implementation Step 1, create Loader ID
+    private static final int MOVIE_LOADER=0;
     String popular="popularity.desc";
     String top="vote_average.desc";
     List<MovieObject>listmovie;
@@ -124,6 +133,22 @@ public class MainActivityFragment extends Fragment {
         //return inflater.inflate(R.layout.fragment_main, container, false);
     }
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+
+        Uri movieUri= MovieContract.MovieEntry.buildMoviesUri(Integer.parseInt(MovieContract.MovieEntry.COLUMN_MOVIE_ID));
+        return new CursorLoader(getActivity(),movieUri,null,null,null,null) ;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
+    }
+
 
     class FetchMovieTask extends AsyncTask<String,Void,MovieObject[]>
     {
@@ -172,7 +197,7 @@ public class MainActivityFragment extends Fragment {
             String movieJSONStr = null;
             try {
 
-                Uri buildUri=Uri.parse(movieBaseUrl).buildUpon().appendQueryParameter(YEAR_PARAM,year).appendQueryParameter(TYPE_VOTE_COUNT,voteCount).appendQueryParameter(TYPE_PARAM,type).appendQueryParameter("vote_count","1000").appendQueryParameter(API_PARAM,api_key).build();
+                Uri buildUri=Uri.parse(movieBaseUrl).buildUpon().appendQueryParameter(YEAR_PARAM,year).appendQueryParameter(TYPE_VOTE_COUNT,voteCount).appendQueryParameter(TYPE_PARAM,type).appendQueryParameter(API_PARAM,api_key).build();
                 Log.v("URL",buildUri.toString());
                 URL url=new URL(buildUri.toString());
                 urlConnection = (HttpURLConnection) url.openConnection();

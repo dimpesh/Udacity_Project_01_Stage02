@@ -12,4 +12,5 @@
     <string name="AddFav">Added To Favourites</string>
     <string name="RmvFav">Removed From Favourites</string>
     <string name="action_share">Share</string>
+    <string name="action_favourite">Favourite</string>
 </resources>

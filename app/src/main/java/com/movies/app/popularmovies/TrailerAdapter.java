@@ -36,7 +36,7 @@ public class TrailerAdapter extends ArrayAdapter<TrailerObject> {
 
 //        Log.v(LOG_TAG,baseUrl+trailerObject.key+endUrl);
         Log.v(LOG_TAG, baseUrl+key+endUrl);
-       Picasso.with(getContext()).load(baseUrl+key+endUrl).into(trailerView);
+       Picasso.with(getContext()).load(baseUrl+key+endUrl).placeholder(R.mipmap.img_placeholder).into(trailerView);
         return convertView;
     }
 
