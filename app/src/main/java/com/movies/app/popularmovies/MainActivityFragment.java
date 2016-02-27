@@ -1,15 +1,15 @@
 package com.movies.app.popularmovies;
 
-import android.app.LoaderManager;
 import android.app.ProgressDialog;
-import android.content.CursorLoader;
 import android.content.Intent;
-import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v4.widget.ContentLoadingProgressBar;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+//
 
 
 /**
@@ -45,13 +46,40 @@ import java.util.List;
  */
 public class MainActivityFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>{
 
+    // Declaring MyCursorAdapter variable and using it in programmin..
+    public MovieCursorAdapter movieCursorAdapter;
     // CursorLoader Implementation Step 1, create Loader ID
     private static final int MOVIE_LOADER=0;
+    // Adding String [] columns.
+    private static final String[] MOVIE_COLUMNS=
+            {
+                            MovieContract.MovieEntry.COLUMN_ID,
+                            MovieContract.MovieEntry.COLUMN_TITLE,
+                            MovieContract.MovieEntry.COLUMN_OVERVIEW,
+                            MovieContract.MovieEntry.COLUMN_RELEASE_DATE,
+                            MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE,
+                            MovieContract.MovieEntry.COLUMN_POSTER_PATH,
+                            MovieContract.MovieEntry.COLUMN_BACKDROP_PATH,
+                            MovieContract.MovieEntry.COLUMN_MOVIE_ID
+            };
+
+    // Defining Colummn Indices....
+    static final int COL_ID=0;
+    static final int COL_TITLE=1;
+    static final int COL_OVERVIEW=2;
+    static final int COL_RELEASE_DATE=3;
+    static final int COL_VOTE_AVERAGE=4;
+    static final int COL_POSTER_PATH=5;
+    static final int COL_BACKDROP_PATH=6;
+    static final int COL_MOVIE_ID=7;
+    // UPTIL HERE
     String popular="popularity.desc";
+    public boolean favMenuSelected;
     String top="vote_average.desc";
     List<MovieObject>listmovie;
      MovieObject []movieObjects;
     private MovieAdapter movieAdapter;
+    GridView gridView;
     public MainActivityFragment() {
     }
 
@@ -78,16 +106,24 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
         int id=item.getItemId();
         if(id==R.id.action_popular)
         {
+            favMenuSelected=false;
             new FetchMovieTask().execute(popular);
             return true;
 
         }
         if(id==R.id.action_top_rated)
         {
+            favMenuSelected=false;
             new FetchMovieTask().execute(top);
             return true;
         }
 
+        if(id==R.id.action_favourite)
+        {
+            favMenuSelected=true;
+            return true;
+//            Toast.makeText(getContext(),"Favourite Called...",Toast.LENGTH_SHORT).show();
+        }
         return super.onOptionsItemSelected(item);
     }
     /// Adding save Instance State...
@@ -96,6 +132,13 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
 //        outState.putParcelableArray("movies",listmovie);
 //        super.onSaveInstanceState(outState);
 //    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState)
+    {
+        getLoaderManager().initLoader(MOVIE_LOADER,null,this);
+        super.onActivityCreated(savedInstanceState);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -108,21 +151,74 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
         movieAdapter=new MovieAdapter(getActivity(),R.layout.grid_item_movies,R.id.grid_item_movies_imageview,listmovie);
         View rootview=inflater.inflate(R.layout.fragment_main,container,false);
         new FetchMovieTask().execute("popularity.desc");
-        GridView gridView= (GridView) rootview.findViewById(R.id.gridview_movies);
+        gridView= (GridView) rootview.findViewById(R.id.gridview_movies);
 
-        gridView.setAdapter(movieAdapter);
+        // CursorAdapter work...
+        String url="content://com.movies.app.popularmovies.app/movie";
+
+        Uri fetchUri=Uri.parse(url);
+        Cursor c= getContext().getContentResolver().query(fetchUri, null, null, null, null);
+        if (c.moveToFirst()) {
+            do {
+                {
+                        String result = "S. NUMBER           : " + c.getString(c.getColumnIndex(MovieContract.MovieEntry._ID))
+                            + "\nMOVIE ID             : " + c.getString(c.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_ID))
+                            + "\nMOVIE TITLE          : " + c.getString(c.getColumnIndex(MovieContract.MovieEntry.COLUMN_TITLE))
+                            +"\nMOVIE OVERVIEW       : "+c.getString(c.getColumnIndex(MovieContract.MovieEntry.COLUMN_OVERVIEW))
+                            +"\nMOVIE RELEASE DATE   : "+c.getString(c.getColumnIndex(MovieContract.MovieEntry.COLUMN_RELEASE_DATE))
+                            +"\nMOVIE VOTE           : "+c.getString(c.getColumnIndex(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE))
+                            +"\nMOVIE POSTER         : "+c.getString(c.getColumnIndex(MovieContract.MovieEntry.COLUMN_POSTER_PATH))
+                            +"\nMOVIE BACKDROP       : "+c.getString(c.getColumnIndex(MovieContract.MovieEntry.COLUMN_BACKDROP_PATH)).toString();
+
+                    Log.v("RESULT_QUERY VERBOSE", result);
+                }
+            } while (c.moveToNext());
+        }
+// Uptil Here...
+
+
+    movieCursorAdapter=new MovieCursorAdapter(getContext(),c,MOVIE_LOADER);
+//        if(favMenuSelected==true)
+//        {
+//            Log.v("MAFragment VERBOSE","Adapter Set Successfully");
+//            gridView.setAdapter(movieCursorAdapter);
+//        }
+//        else
+//        {
+//            gridView.setAdapter(movieAdapter);
+//        }
+
+        if(!favMenuSelected)
+            gridView.setAdapter(movieAdapter);
+
+
 
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-            MovieObject movieClicked= (MovieObject) movieAdapter.getItem(position);
-                //String overview=movieClicked.overview;
-                //Toast.makeText(getActivity(),overview,Toast.LENGTH_SHORT).show();
+
+
+                MovieObject movieClicked=null;
+
+                if(favMenuSelected==false) {
+                     movieClicked= (MovieObject) movieAdapter.getItem(position);
+                    //String overview=movieClicked.overview;
+                    //Toast.makeText(getActivity(),overview,Toast.LENGTH_SHORT).show();
+                }
+                else
+                {
+                    movieClicked=(MovieObject)movieCursorAdapter.getItem(position);
+                }
+
+
+
+
                 Intent intent=new Intent(getActivity(),DetailActivity.class);
 //l4                Bundle mBundle=new Bundle();
 
 //                mBundle.putSerializable("MovieObjectSent",movieClicked);
 //                intent.putExtras(mBundle);
+
                 intent.putExtra("data",movieClicked);
                 startActivity(intent);
 
@@ -135,18 +231,54 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        Log.v("onCreateLoader :","-----------------------Called Successfully-----------------");
 
-        Uri movieUri= MovieContract.MovieEntry.buildMoviesUri(Integer.parseInt(MovieContract.MovieEntry.COLUMN_MOVIE_ID));
-        return new CursorLoader(getActivity(),movieUri,null,null,null,null) ;
+        String url="content://com.movies.app.popularmovies.app/movie";
+
+        Uri fetchUri=Uri.parse(url);
+        // try fetch URI if failed.
+//        Uri movieUri= MovieContract.MovieEntry.buildMoviesUri(Integer.parseInt(MovieContract.MovieEntry.COLUMN_MOVIE_ID));
+        return new CursorLoader(getActivity(),fetchUri,MOVIE_COLUMNS,null,null,null) ;
     }
 
+    // onLoadFinihed is called when the Data is Ready...
     @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+    public void onLoadFinished(Loader<Cursor> loader, Cursor c)
+    {
+        Log.v("onLoadFinished","-----------------------Called Successfully-----------------");
+        // This Works...
+//        if (c.moveToFirst()) {
+//            do {
+//                {
+//                    String result = "S. NUMBER(onLoadFinished)           : " + c.getString(c.getColumnIndex(MovieContract.MovieEntry._ID))
+//                            + "\nMOVIE ID(onLoadFinished)             : " + c.getString(c.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_ID))
+//                            + "\nMOVIE TITLE(onLoadFinished)          : " + c.getString(c.getColumnIndex(MovieContract.MovieEntry.COLUMN_TITLE))
+//                            +"\nMOVIE OVERVIEW(onLoadFinished)       : "+c.getString(c.getColumnIndex(MovieContract.MovieEntry.COLUMN_OVERVIEW))
+//                            +"\nMOVIE RELEASE DATE(onLoadFinished)   : "+c.getString(c.getColumnIndex(MovieContract.MovieEntry.COLUMN_RELEASE_DATE))
+//                            +"\nMOVIE VOTE(onLoadFinished)           : "+c.getString(c.getColumnIndex(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE))
+//                            +"\nMOVIE POSTER(onLoadFinished)         : "+c.getString(c.getColumnIndex(MovieContract.MovieEntry.COLUMN_POSTER_PATH))
+//                            +"\nMOVIE BACKDROP(onLoadFinished)       : "+c.getString(c.getColumnIndex(MovieContract.MovieEntry.COLUMN_BACKDROP_PATH)).toString();
+//
+//                    Log.v("RESULT_QUERY VERBOSE", result);
+//                }
+//            } while (c.moveToNext());
+//        }
+        if(movieCursorAdapter==null)
+            movieCursorAdapter=new MovieCursorAdapter(getContext(),c,MOVIE_LOADER);
+        movieCursorAdapter.swapCursor(c);
+        Log.v("Favourite VERBOSE", String.valueOf(favMenuSelected));
+
+        if(favMenuSelected)
+            gridView.setAdapter(movieCursorAdapter);
     }
 
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
 
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader)
+    {
+        Log.v("onLoaderReset","-----------------------Called Successfully-----------------");
+
+        movieCursorAdapter.swapCursor(null);
     }
 
 
@@ -184,7 +316,7 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
         @Override
         protected MovieObject[] doInBackground(String... strings) {
             final String movieBaseUrl="http://api.themoviedb.org/3/discover/movie?";
-            String api_key=getString(R.string.api_key);
+            String api_key=BuildConfig.MyTmdbApiKey;
             String API_PARAM="api_key";
             String TYPE_PARAM="sort_by";
             String YEAR_PARAM="primary_release_year";
