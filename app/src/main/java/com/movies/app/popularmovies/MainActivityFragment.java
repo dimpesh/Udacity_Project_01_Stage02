@@ -20,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import com.movies.app.popularmovies.Data.MovieContract;
 
@@ -73,6 +74,8 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     static final int COL_BACKDROP_PATH=6;
     static final int COL_MOVIE_ID=7;
     // UPTIL HERE
+    MovieObject movieClicked;
+
     String popular="popularity.desc";
     public boolean favMenuSelected;
     String top="vote_average.desc";
@@ -121,6 +124,8 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
         if(id==R.id.action_favourite)
         {
             favMenuSelected=true;
+            getLoaderManager().restartLoader(MOVIE_LOADER,null,this);
+
             return true;
 //            Toast.makeText(getContext(),"Favourite Called...",Toast.LENGTH_SHORT).show();
         }
@@ -178,19 +183,9 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
 
 
     movieCursorAdapter=new MovieCursorAdapter(getContext(),c,MOVIE_LOADER);
-//        if(favMenuSelected==true)
-//        {
-//            Log.v("MAFragment VERBOSE","Adapter Set Successfully");
-//            gridView.setAdapter(movieCursorAdapter);
-//        }
-//        else
-//        {
-//            gridView.setAdapter(movieAdapter);
-//        }
 
         if(!favMenuSelected)
             gridView.setAdapter(movieAdapter);
-
 
 
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -198,29 +193,34 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
 
 
-                MovieObject movieClicked=null;
 
                 if(favMenuSelected==false) {
                      movieClicked= (MovieObject) movieAdapter.getItem(position);
                     //String overview=movieClicked.overview;
                     //Toast.makeText(getActivity(),overview,Toast.LENGTH_SHORT).show();
-                }
-                else
-                {
-                    movieClicked=(MovieObject)movieCursorAdapter.getItem(position);
-                }
-
-
-
-
-                Intent intent=new Intent(getActivity(),DetailActivity.class);
+                    Intent intent=new Intent(getActivity(),DetailActivity.class);
 //l4                Bundle mBundle=new Bundle();
 
 //                mBundle.putSerializable("MovieObjectSent",movieClicked);
 //                intent.putExtras(mBundle);
 
-                intent.putExtra("data",movieClicked);
-                startActivity(intent);
+                    intent.putExtra("data",movieClicked);
+                    startActivity(intent);
+
+                }
+                else
+                {
+
+                    Log.v("ON item Listener", String.valueOf(movieCursorAdapter.getCount()));
+                    Toast.makeText(getContext(), "Movie Clicked : ",Toast.LENGTH_SHORT).show();
+
+//                    movieClicked=.getItemAtPosition(position);
+
+                }
+
+
+
+
 
 
             }
@@ -299,6 +299,7 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
                 movieAdapter.add(m);
             }
 
+            movieAdapter.notifyDataSetChanged();
             if(dialog.isShowing()==true)
             {
                 dialog.dismiss();

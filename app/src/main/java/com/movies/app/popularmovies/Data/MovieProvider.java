@@ -91,12 +91,15 @@ public class MovieProvider extends ContentProvider{
         {
             case MOVIE : {
                 retCursor = mDbHelper.getReadableDatabase().query(MovieContract.MovieEntry.TABLE_MOVIE, projection, selection, selArgs, null, null, sort);
+                retCursor.setNotificationUri(getContext().getContentResolver(),uri);
                 return retCursor;
 
             }
             // Try to combine also
             case MOVIE_WITH_ID : {
                 retCursor = mDbHelper.getReadableDatabase().query(MovieContract.MovieEntry.TABLE_MOVIE, projection, MovieContract.MovieEntry.COLUMN_ID, new String[]{String.valueOf(ContentUris.parseId(uri))}, null, null, sort);
+                retCursor.setNotificationUri(getContext().getContentResolver(),uri);
+
                 return retCursor;
 
             }
