@@ -78,6 +78,7 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
 
     String popular="popularity.desc";
     public boolean favMenuSelected;
+    public boolean popMenuselected=true;
     String top="vote_average.desc";
     List<MovieObject>listmovie;
      MovieObject []movieObjects;
@@ -110,6 +111,8 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
         if(id==R.id.action_popular)
         {
             favMenuSelected=false;
+            popMenuselected=true;
+            gridView.setAdapter(movieAdapter);
             new FetchMovieTask().execute(popular);
             return true;
 
@@ -117,6 +120,8 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
         if(id==R.id.action_top_rated)
         {
             favMenuSelected=false;
+            popMenuselected=false;
+            gridView.setAdapter(movieAdapter);
             new FetchMovieTask().execute(top);
             return true;
         }
@@ -138,11 +143,13 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
 //        super.onSaveInstanceState(outState);
 //    }
 
+
     @Override
     public void onActivityCreated(Bundle savedInstanceState)
     {
-        getLoaderManager().initLoader(MOVIE_LOADER,null,this);
         super.onActivityCreated(savedInstanceState);
+        getLoaderManager().initLoader(MOVIE_LOADER, null, this);
+
     }
 
     @Override
@@ -163,64 +170,57 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
 
         Uri fetchUri=Uri.parse(url);
         Cursor c= getContext().getContentResolver().query(fetchUri, null, null, null, null);
-        if (c.moveToFirst()) {
-            do {
-                {
-                        String result = "S. NUMBER           : " + c.getString(c.getColumnIndex(MovieContract.MovieEntry._ID))
-                            + "\nMOVIE ID             : " + c.getString(c.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_ID))
-                            + "\nMOVIE TITLE          : " + c.getString(c.getColumnIndex(MovieContract.MovieEntry.COLUMN_TITLE))
-                            +"\nMOVIE OVERVIEW       : "+c.getString(c.getColumnIndex(MovieContract.MovieEntry.COLUMN_OVERVIEW))
-                            +"\nMOVIE RELEASE DATE   : "+c.getString(c.getColumnIndex(MovieContract.MovieEntry.COLUMN_RELEASE_DATE))
-                            +"\nMOVIE VOTE           : "+c.getString(c.getColumnIndex(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE))
-                            +"\nMOVIE POSTER         : "+c.getString(c.getColumnIndex(MovieContract.MovieEntry.COLUMN_POSTER_PATH))
-                            +"\nMOVIE BACKDROP       : "+c.getString(c.getColumnIndex(MovieContract.MovieEntry.COLUMN_BACKDROP_PATH)).toString();
-
-                    Log.v("RESULT_QUERY VERBOSE", result);
-                }
-            } while (c.moveToNext());
-        }
+//        if (c.moveToFirst()) {
+//            do {
+//                {
+//                        String result = "S. NUMBER           : " + c.getString(c.getColumnIndex(MovieContract.MovieEntry._ID))
+//                            + "\nMOVIE ID             : " + c.getString(c.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_ID))
+//                            + "\nMOVIE TITLE          : " + c.getString(c.getColumnIndex(MovieContract.MovieEntry.COLUMN_TITLE))
+//                            +"\nMOVIE OVERVIEW       : "+c.getString(c.getColumnIndex(MovieContract.MovieEntry.COLUMN_OVERVIEW))
+//                            +"\nMOVIE RELEASE DATE   : "+c.getString(c.getColumnIndex(MovieContract.MovieEntry.COLUMN_RELEASE_DATE))
+//                            +"\nMOVIE VOTE           : "+c.getString(c.getColumnIndex(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE))
+//                            +"\nMOVIE POSTER         : "+c.getString(c.getColumnIndex(MovieContract.MovieEntry.COLUMN_POSTER_PATH))
+//                            +"\nMOVIE BACKDROP       : "+c.getString(c.getColumnIndex(MovieContract.MovieEntry.COLUMN_BACKDROP_PATH)).toString();
+//
+//                    Log.v("RESULT_QUERY VERBOSE", result);
+//                }
+//            } while (c.moveToNext());
+//        }
 // Uptil Here...
 
 
-    movieCursorAdapter=new MovieCursorAdapter(getContext(),c,MOVIE_LOADER);
+//    movieCursorAdapter=new MovieCursorAdapter(getContext(),c,MOVIE_LOADER);
 
         if(!favMenuSelected)
             gridView.setAdapter(movieAdapter);
-
+        movieAdapter.notifyDataSetChanged();
 
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
 
 
-
-                if(favMenuSelected==false) {
-                     movieClicked= (MovieObject) movieAdapter.getItem(position);
+                if (favMenuSelected == false) {
+                    movieClicked = (MovieObject) movieAdapter.getItem(position);
                     //String overview=movieClicked.overview;
                     //Toast.makeText(getActivity(),overview,Toast.LENGTH_SHORT).show();
-                    Intent intent=new Intent(getActivity(),DetailActivity.class);
+
+                } else {
+
+                    Log.v("ON item Listener", String.valueOf(movieCursorAdapter.getCount()));
+                    Toast.makeText(getContext(), "Movie Clicked : ", Toast.LENGTH_SHORT).show();
+
+//                    movieClicked=.getItemAtPosition(position);
+
+                }
+                Intent intent = new Intent(getActivity(), DetailActivity.class);
 //l4                Bundle mBundle=new Bundle();
 
 //                mBundle.putSerializable("MovieObjectSent",movieClicked);
 //                intent.putExtras(mBundle);
 
-                    intent.putExtra("data",movieClicked);
-                    startActivity(intent);
-
-                }
-                else
-                {
-
-                    Log.v("ON item Listener", String.valueOf(movieCursorAdapter.getCount()));
-                    Toast.makeText(getContext(), "Movie Clicked : ",Toast.LENGTH_SHORT).show();
-
-//                    movieClicked=.getItemAtPosition(position);
-
-                }
-
-
-
-
+                intent.putExtra("data", movieClicked);
+                startActivity(intent);
 
 
             }
@@ -231,7 +231,7 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        Log.v("onCreateLoader :","-----------------------Called Successfully-----------------");
+        Log.v("onCreateLoader :", "-----------------------Called Successfully-----------------");
 
         String url="content://com.movies.app.popularmovies.app/movie";
 
@@ -273,6 +273,19 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     }
 
 
+//    @Override
+//    public void onStart() {
+//        super.onStart();
+//        if(!favMenuSelected)
+//        {
+//            if(!popMenuselected)
+//                new FetchMovieTask().execute(top);
+//            else
+//                new FetchMovieTask().execute(popular);
+//        }
+//
+//    }
+
     @Override
     public void onLoaderReset(Loader<Cursor> loader)
     {
@@ -294,12 +307,10 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
         if(str!=null)
                 movieAdapter.clear();
 
-            for(MovieObject m : str)
-            {
-                movieAdapter.add(m);
-            }
+                for (MovieObject m : str) {
+                    movieAdapter.add(m);
+                }
 
-            movieAdapter.notifyDataSetChanged();
             if(dialog.isShowing()==true)
             {
                 dialog.dismiss();
@@ -330,7 +341,7 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
             String movieJSONStr = null;
             try {
 
-                Uri buildUri=Uri.parse(movieBaseUrl).buildUpon().appendQueryParameter(YEAR_PARAM,year).appendQueryParameter(TYPE_VOTE_COUNT,voteCount).appendQueryParameter(TYPE_PARAM,type).appendQueryParameter(API_PARAM,api_key).build();
+                Uri buildUri=Uri.parse(movieBaseUrl).buildUpon().appendQueryParameter(TYPE_VOTE_COUNT,voteCount).appendQueryParameter(TYPE_PARAM,type).appendQueryParameter(API_PARAM,api_key).build();
                 Log.v("URL",buildUri.toString());
                 URL url=new URL(buildUri.toString());
                 urlConnection = (HttpURLConnection) url.openConnection();
@@ -383,5 +394,16 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
 
 
         }
+    }
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
+//        if(popMenuselected)
+//            new FetchMovieTask().execute(popular);
+//            else
+//        new FetchMovieTask().execute(top);
+        movieAdapter.notifyDataSetChanged();
     }
 }
