@@ -473,6 +473,7 @@ public class DetailActivityFragment extends Fragment
                 if (buffer.length() == 0) {
                     jsonStr = null;
                 }
+
                 jsonStr = buffer.toString();
                 JSONObject trailerObject = new JSONObject(jsonStr);
                 Log.v("VERBOSE",trailerObject.toString());

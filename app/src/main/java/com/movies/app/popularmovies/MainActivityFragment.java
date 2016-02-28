@@ -20,7 +20,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
-import android.widget.Toast;
 
 import com.movies.app.popularmovies.Data.MovieContract;
 
@@ -97,7 +96,22 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
 //        }
 //    //    setRetainInstance(true);
         setHasOptionsMenu(true);
+
+//        if(savedInstanceState==null || !savedInstanceState.containsKey("mov"))
+//        {
+//            listmovie=new ArrayList<MovieObject>(Arrays.asList(movieObjects));
+//        }
+//        else
+//        {
+//            listmovie=savedInstanceState.getParcelableArrayList("mov");
+//        }
     }
+
+//    @Override
+//    public void onSaveInstanceState(Bundle outState) {
+//        outState.putParcelableArray("mov",movieObjects);
+//        super.onSaveInstanceState(outState);
+//    }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -153,7 +167,7 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView( LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         //String []moviesArray= {"MONDAY","TUESDAY","WENESDAY","THURSDAY"};
         movieObjects= new MovieObject[]{new MovieObject("a"), new MovieObject("b")};
@@ -205,22 +219,33 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
                     //String overview=movieClicked.overview;
                     //Toast.makeText(getActivity(),overview,Toast.LENGTH_SHORT).show();
 
-                } else {
-
-                    Log.v("ON item Listener", String.valueOf(movieCursorAdapter.getCount()));
-                    Toast.makeText(getContext(), "Movie Clicked : ", Toast.LENGTH_SHORT).show();
-
-//                    movieClicked=.getItemAtPosition(position);
-
-                }
-                Intent intent = new Intent(getActivity(), DetailActivity.class);
+                    Intent intent = new Intent(getActivity(), DetailActivity.class);
 //l4                Bundle mBundle=new Bundle();
 
 //                mBundle.putSerializable("MovieObjectSent",movieClicked);
 //                intent.putExtras(mBundle);
 
-                intent.putExtra("data", movieClicked);
-                startActivity(intent);
+                    intent.putExtra("data", movieClicked);
+                    startActivity(intent);
+
+                } else {
+
+                    Cursor cursor= (Cursor) adapterView.getItemAtPosition(position);
+                    MovieObject mo=new MovieObject();
+
+                    mo.title=cursor.getString(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_TITLE));
+                    mo.id=cursor.getString(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_ID));
+                    mo.poster_path=cursor.getString(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_POSTER_PATH));
+                    mo.backdrop_path=cursor.getString(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_BACKDROP_PATH));
+                    mo.vote_average=cursor.getString(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE));
+                    mo.release_date=cursor.getString(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_RELEASE_DATE));
+                    mo.overview=cursor.getString(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_OVERVIEW));
+                    Log.v("Movie Detail :",cursor.getString(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_OVERVIEW)));
+
+                    Intent intent=new Intent(getActivity(),DetailActivity.class);
+                    intent.putExtra("data",mo);
+                    startActivity(intent);
+                }
 
 
             }

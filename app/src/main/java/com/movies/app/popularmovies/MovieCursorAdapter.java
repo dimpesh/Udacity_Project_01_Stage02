@@ -9,6 +9,8 @@ import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.ImageView;
 
+import com.squareup.picasso.Picasso;
+
 /**
  * Created by DIMPESH : ${month}
  */
@@ -38,12 +40,14 @@ public class MovieCursorAdapter extends CursorAdapter{
     {
         Log.v("MovieCursorAdapter"," : Bind View Called");
 
+        String baseImageUrl="http://image.tmdb.org/t/p/w185/";
 
-        String str=cursor.getString(MainActivityFragment.COL_POSTER_PATH);
+        String str=baseImageUrl+cursor.getString(MainActivityFragment.COL_POSTER_PATH);
+        Log.v("URL MCA :",str);
 
         ImageView poster= (ImageView) view.findViewById(R.id.grid_item_movies_imageview);
-//        Picasso.with(context).load("").placeholder(R.mipmap.img_placeholder).into(poster);
-            poster.setImageResource(R.mipmap.img_placeholder);
+        Picasso.with(context).load(str).placeholder(R.mipmap.img_placeholder).into(poster);
+  //          poster.setImageResource(R.mipmap.img_placeholder);
     }
 
     // tried implementing getCount... can be replaced...
