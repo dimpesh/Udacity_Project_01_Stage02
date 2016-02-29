@@ -70,9 +70,10 @@ public class DetailActivityFragment extends Fragment
     @Override
     public void onStart() {
         super.onStart();
-
-        Intent intent=getActivity().getIntent();
-        movieRecieved=intent.getParcelableExtra("data");
+//  commented due to two pane UI
+//        Intent intent=getActivity().getIntent();
+//        movieRecieved=intent.getParcelableExtra("data");
+// uptil here
 
         // Uncomment to share key value correctly...
 //        try {
@@ -84,7 +85,7 @@ public class DetailActivityFragment extends Fragment
 //            e.printStackTrace();
 //        }
 //
-        new DataFetcher().execute(movieRecieved.id);
+//        new DataFetcher().execute(movieRecieved.id);
 
         // Uptil Here..
 
@@ -108,7 +109,7 @@ public class DetailActivityFragment extends Fragment
                              Bundle savedInstanceState) {
 
         View rootView=inflater.inflate(R.layout.fragment_detail, container, false);
-        Intent intent=getActivity().getIntent();
+  //      Intent intent=getActivity().getIntent();
 //l4        Bundle bundle= intent.getExtras();
         String API_KEY="api_key";
    //     trailerAdapter=new TrailerAdapter(getActivity(),R.layout.list_item_trailer,R.id.trailer_image,trailerKeyList);
@@ -124,20 +125,24 @@ public class DetailActivityFragment extends Fragment
 //        fBtn= (Button) rootView.findViewById(R.id.favouriteBtn);
 
 //l4        MovieObject movieRecieved= (MovieObject) bundle.getSerializable("MovieObjectSent");
-            final MovieObject movieRecieved=intent.getParcelableExtra("data");
+    //        final MovieObject movieRecieved=intent.getParcelableExtra("data");
         ImageView movieBackdrop= (ImageView) rootView.findViewById(R.id.movie_backdrop);
         final ImageView moviePoster= (ImageView) rootView.findViewById(R.id.movie_poster);
         TextView movie_vote_average= (TextView) rootView.findViewById(R.id.movie_vote_average);
         final TextView movie_release= (TextView) rootView.findViewById(R.id.movie_release);
-        Picasso.with(getContext()).load(baseUrlImage + movieRecieved.backdrop_path).placeholder(R.mipmap.img_placeholder).into(movieBackdrop);
-        Picasso.with(getContext()).load(baseUrlImage + movieRecieved.poster_path).placeholder(R.mipmap.img_placeholder).into(moviePoster);
-        getActivity().setTitle(movieRecieved.title);
+//        Picasso.with(getContext()).load(baseUrlImage + movieRecieved.backdrop_path).placeholder(R.mipmap.img_placeholder).into(movieBackdrop);
+//        Picasso.with(getContext()).load(baseUrlImage + movieRecieved.poster_path).placeholder(R.mipmap.img_placeholder).into(moviePoster);
+        Picasso.with(getContext()).load(baseUrlImage + "286217").placeholder(R.mipmap.img_placeholder).into(movieBackdrop);
+        Picasso.with(getContext()).load(baseUrlImage + "286217").placeholder(R.mipmap.img_placeholder).into(moviePoster);
+//        getActivity().setTitle(movieRecieved.title);
+        getActivity().setTitle("title");
 
 
         // Uncomment to share key value correctly...
         try {
 
-           trailer_string=new TrailerFetcher().execute(movieRecieved.id).get()[0].getKey();
+//           trailer_string=new TrailerFetcher().execute(movieRecieved.id).get()[0].getKey();
+           trailer_string=new TrailerFetcher().execute("286217").get()[0].getKey();
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
@@ -147,7 +152,8 @@ public class DetailActivityFragment extends Fragment
         String url="content://com.movies.app.popularmovies.app/movie";
 
         Uri fetchUri=Uri.parse(url);
-        Cursor findQuery=getContext().getContentResolver().query(fetchUri, null, "movie_id=" + movieRecieved.id, null, null);
+//        Cursor findQuery=getContext().getContentResolver().query(fetchUri, null, "movie_id=" + movieRecieved.id, null, null);
+        Cursor findQuery=getContext().getContentResolver().query(fetchUri, null, "movie_id=286217" , null, null);
         if(findQuery.moveToFirst()) {
             isFavourite=true;
         }
@@ -259,11 +265,16 @@ public class DetailActivityFragment extends Fragment
 
         TextView overview= (TextView) rootView.findViewById(R.id.movie_overview);
 
-        overview.setText(movieRecieved.overview);
+//        overview.setText(movieRecieved.overview);
+        overview.setText("overview");
+
 //        TrailerObject obj=myTrailerAdapter.getItem(1);
 //        Log.v(LOG_TAG,obj.getKey());
-        movie_release.setText(movieRecieved.release_date);
-        movie_vote_average.setText(movieRecieved.vote_average);
+//        movie_release.setText(movieRecieved.release_date);
+        movie_release.setText("20151212");
+ //       movie_vote_average.setText(movieRecieved.vote_average);
+        movie_vote_average.setText("7");
+
         reviewView= (TextView) rootView.findViewById(R.id.movie_review);
         reviewView.setText(reviewStr);
 

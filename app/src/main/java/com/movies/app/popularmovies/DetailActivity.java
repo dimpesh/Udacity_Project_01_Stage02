@@ -18,6 +18,11 @@ public class DetailActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        if(savedInstanceState==null)
+        {
+            getSupportFragmentManager().beginTransaction().add(R.id.movie_detail_container,new DetailActivityFragment()).commit();
+        }
     }
 
     @Override
