@@ -46,6 +46,28 @@ import java.util.List;
  */
 public class MainActivityFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>{
 
+//    public MainActivityFragment(){}
+
+//    public static interface WorkoutListListener
+//    {
+//        public void onClick(long id);
+//    }
+//    WorkoutListListener listener;
+
+
+//    @Override
+//    public void onAttach(Activity activity) {
+//        super.onAttach(activity);
+//        listener=(WorkoutListListener)activity;
+//    }
+
+//    @Override
+//    public void onListItemClick(ListView l, View v, int position, long id) {
+//        if(listener!=null)
+//            listener.onClick(id);
+////        super.onListItemClick(l, v, position, id);
+//    }
+
     // Declaring MyCursorAdapter variable and using it in programmin..
     public MovieCursorAdapter movieCursorAdapter;
     // CursorLoader Implementation Step 1, create Loader ID

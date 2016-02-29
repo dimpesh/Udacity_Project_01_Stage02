@@ -2,12 +2,13 @@ package com.movies.app.popularmovies;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
 
-public class MainActivity extends AppCompatActivity {
-
+public class MainActivity extends AppCompatActivity{
+    //implements} MainActivityFragment.WorkoutListListener{
 
     private static final String DETAILFRAGMENT_TAG = "DFTAG";
     private boolean mTwoPane;
@@ -15,8 +16,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-//        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-//        setSupportActionBar(toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         if(findViewById(R.id.movie_detail_container)!=null)
         {
@@ -63,4 +65,13 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+//    @Override
+//    public void onClick(long id) {
+//        View fragmentContainer=findViewById(R.id.movie_detail_container);
+//        if(fragmentContainer!=null)
+//        {
+//            DetailActivityFragment details=new DetailActivityFragment();
+//            FragmentTransaction ft=getFragmentManager().beginTransaction();
+//        }
+//    }
 }

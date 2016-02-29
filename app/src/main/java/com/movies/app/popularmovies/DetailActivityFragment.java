@@ -135,7 +135,8 @@ public class DetailActivityFragment extends Fragment
         Picasso.with(getContext()).load(baseUrlImage + "286217").placeholder(R.mipmap.img_placeholder).into(movieBackdrop);
         Picasso.with(getContext()).load(baseUrlImage + "286217").placeholder(R.mipmap.img_placeholder).into(moviePoster);
 //        getActivity().setTitle(movieRecieved.title);
-        getActivity().setTitle("title");
+// uncomment it for title...
+//        getActivity().setTitle("title");
 
 
         // Uncomment to share key value correctly...
