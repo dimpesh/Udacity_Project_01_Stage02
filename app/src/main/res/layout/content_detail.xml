@@ -6,11 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".DetailActivity"
     tools:ignore="MergeRootFrame"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
 />
 
-<!--
-    android:name="com.movies.app.popularmovies.DetailActivityFragment"
-
-    app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:layout="@layout/fragment_detail" />
--->
